@@ -4,6 +4,7 @@ import {
   Button,
   TextInput,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { auth } from "../firebase";
@@ -49,14 +50,23 @@ const LoginScreen = () => {
   };
 
   const handleSignUp = () => {
+    if (!email || !password) {
+      Alert.alert("Please provide both email and password");
+      return;
+    }
     signUpWithEmailAndPassword(email, password)
       .then((user) => {
         // Handle successful signup
         console.log("User signed up:", user);
       })
       .catch((error) => {
-        // Handle signup error
-        console.error("Signup failed:", error);
+        let errorMessage = error.message;
+        if (error.code === "auth/weak-password") {
+          errorMessage = "The password is too weak.";
+        } else if (error.code === " auth/email-already-in-use") {
+          errorMessage = "The email address is already in use.";
+        }
+        Alert.alert("Error", errorMessage);
       });
   };
 
@@ -80,6 +90,9 @@ const LoginScreen = () => {
   };
 
   const handleLogIn = () => {
+    if (email !== "" && password !== "") {
+      return;
+    }
     LogInWithEmailAndPassword(email, password)
       .then((user) => {
         // Handle successful signup
@@ -93,7 +106,11 @@ const LoginScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
       <View style={{ width: "80%" }}>
         <Text>Email</Text>
